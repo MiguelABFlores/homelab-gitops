@@ -1,0 +1,30 @@
+replicaCount: 1
+
+image:
+  pullPolicy: IfNotPresent
+
+# Exponer via Traefik
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  hosts:
+    - host: headlamp.192.168.0.240.nip.io
+      paths:
+        - path: /
+          type: Prefix
+
+# RBAC — necesita acceso de lectura a todo el cluster
+clusterRoleBinding:
+  enabled: true
+
+# Sin persistencia necesaria — es stateless
+persistentVolumeClaim:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
