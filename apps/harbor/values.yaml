@@ -55,6 +55,8 @@ jobservice:
     limits: {memory: 512Mi}
 registry:
   registry:
+    strategy:
+      type: Recreate
     resources:
       requests: {cpu: 50m, memory: 256Mi}
       limits: {memory: 512Mi}
