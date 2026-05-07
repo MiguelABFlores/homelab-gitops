@@ -25,7 +25,6 @@ alertmanager:
 # Grafana — expose via Traefik
 grafana:
   enabled: true
-  adminPassword: changeme   # we'll rotate this immediately after install
   persistence:
     enabled: true
     storageClassName: longhorn
