@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: cloudflared
+  labels:
+    app: cloudflared
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: cloudflared
+      containers:
+      - name: cloudflared
+        image: cloudflare/cloudflared:latest
+        args:
+          - tunnel
+          - --no-autoupdate
+          - --metrics
+          - 0.0.0.0:2000
+          - run
+        env:
+        - name: TUNNEL_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: cloudflared-token
+              key: token
+        ports:
+        - name: metrics
+          containerPort: 2000
+        resources:
+          requests: {cpu: 10m, memory: 32Mi}
+          limits: {cpu: 200m, memory: 128Mi}
+        livenessProbe:
+          httpGet:
+            path: /ready
+            port: metrics
+          initialDelaySeconds: 10
+          periodSeconds: 10
