@@ -48,6 +48,8 @@ portal:
     requests: {cpu: 20m, memory: 64Mi}
     limits: {memory: 128Mi}
 jobservice:
+  strategy:
+    type: Recreate
   resources:
     requests: {cpu: 50m, memory: 256Mi}
     limits: {memory: 512Mi}
