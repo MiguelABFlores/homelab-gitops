@@ -161,6 +161,6 @@ git push
 
 ## Author
 
-**Miguel Flores** — [miguelabf-devops.com](https://miguelabf-devops.com) · [LinkedIn](https://linkedin.com/in/miguelabflores) · [GitHub](https://github.com/MiguelABFlores)
+**Miguel Flores** — [www.miguelabf-devops.com](https://www.miguelabf-devops.com) · [LinkedIn](https://www.linkedin.com/in/mabrisenof/) · [GitHub](https://github.com/MiguelABFlores)
 
 > *Built as a hands-on DevOps learning platform after transitioning from an SRE role at Oracle. Every component was deliberately chosen to reflect real production patterns.*
