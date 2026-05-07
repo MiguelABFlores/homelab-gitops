@@ -1,0 +1,72 @@
+expose:
+  type: ingress
+  tls:
+    enabled: false
+  ingress:
+    hosts:
+      core: harbor.192.168.0.240.nip.io
+    className: traefik
+    controller: default
+    annotations: {}
+
+externalURL: http://harbor.192.168.0.240.nip.io
+
+database:
+  type: internal
+  internal:
+    password: changeit-db
+    resources:
+      requests: {cpu: 50m, memory: 256Mi}
+      limits: {memory: 512Mi}
+redis:
+  type: internal
+  internal:
+    resources:
+      requests: {cpu: 20m, memory: 64Mi}
+      limits: {memory: 128Mi}
+
+persistence:
+  enabled: true
+  resourcePolicy: keep
+  persistentVolumeClaim:
+    registry:    {storageClass: longhorn, size: 10Gi}
+    jobservice:
+      jobLog:    {storageClass: longhorn, size: 1Gi}
+    database:    {storageClass: longhorn, size: 2Gi}
+    redis:       {storageClass: longhorn, size: 1Gi}
+    trivy:       {storageClass: longhorn, size: 5Gi}
+
+harborAdminPassword: ChangeMeInUI123!
+logLevel: info
+
+core:
+  resources:
+    requests: {cpu: 50m, memory: 256Mi}
+    limits: {memory: 512Mi}
+portal:
+  resources:
+    requests: {cpu: 20m, memory: 64Mi}
+    limits: {memory: 128Mi}
+jobservice:
+  resources:
+    requests: {cpu: 50m, memory: 256Mi}
+    limits: {memory: 512Mi}
+registry:
+  registry:
+    resources:
+      requests: {cpu: 50m, memory: 256Mi}
+      limits: {memory: 512Mi}
+  controller:
+    resources:
+      requests: {cpu: 20m, memory: 64Mi}
+      limits: {memory: 128Mi}
+trivy:
+  enabled: true
+  resources:
+    requests: {cpu: 50m, memory: 256Mi}
+    limits: {memory: 512Mi}
+
+metrics: {enabled: false}
+trace: {enabled: false}
+chartmuseum: {enabled: false}
+notary: {enabled: false}
