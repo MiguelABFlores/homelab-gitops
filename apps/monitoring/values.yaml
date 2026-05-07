@@ -1,0 +1,116 @@
+# kube-prometheus-stack values
+
+defaultRules:
+  create: true
+
+# Alertmanager — keep it running but don't expose externally yet
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+    retention: 120h
+
+# Grafana — expose via Traefik
+grafana:
+  enabled: true
+  adminPassword: changeme   # we'll rotate this immediately after install
+  persistence:
+    enabled: true
+    storageClassName: longhorn
+    size: 5Gi
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - grafana.192.168.0.240.nip.io
+    path: /
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+  # Auto-provision datasources and dashboards from sidecars
+  sidecar:
+    dashboards:
+      enabled: true
+    datasources:
+      enabled: true
+
+# Prometheus — the heavy hitter
+prometheus:
+  prometheusSpec:
+    retention: 7d            # 7 days of metrics — fine for homelab
+    retentionSize: 10GiB
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 15Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 768Mi
+      limits:
+        memory: 1500Mi
+    # Discover ServiceMonitors across all namespaces, regardless of label
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - prometheus.192.168.0.240.nip.io
+    paths:
+      - /
+
+# kube-state-metrics — small, useful
+kubeStateMetrics:
+  enabled: true
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+
+# node-exporter — runs on every node
+nodeExporter:
+  enabled: true
+
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+
+# Disable controlPlane scraping that doesn't work with kubeadm out of the box
+# (these are common gotchas — we'll come back to them)
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeEtcd:
+  enabled: false
