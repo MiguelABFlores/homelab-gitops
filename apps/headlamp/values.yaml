@@ -3,6 +3,10 @@ replicaCount: 1
 image:
   pullPolicy: IfNotPresent
 
+config:
+  # Modo in-cluster — usa la API del propio cluster
+  inCluster: true
+
 # Exponer via Traefik
 ingress:
   enabled: true
@@ -13,11 +17,10 @@ ingress:
         - path: /
           type: Prefix
 
-# RBAC — necesita acceso de lectura a todo el cluster
+# RBAC
 clusterRoleBinding:
   enabled: true
 
-# Sin persistencia necesaria — es stateless
 persistentVolumeClaim:
   enabled: false
 
