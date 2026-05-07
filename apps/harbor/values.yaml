@@ -66,6 +66,8 @@ registry:
       limits: {memory: 128Mi}
 trivy:
   enabled: true
+  strategy:
+    type: Recreate
   resources:
     requests: {cpu: 50m, memory: 256Mi}
     limits: {memory: 512Mi}
