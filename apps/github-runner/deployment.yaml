@@ -28,19 +28,6 @@ spec:
         volumeMounts:
         - name: buildkit-config
           mountPath: /buildkit-config
-      - name: install-ca
-        image: busybox
-        command:
-        - sh
-        - -c
-        - |
-          cp /homelab-ca/homelab-ca.crt /etc/ssl/homelab/homelab-ca.crt
-        volumeMounts:
-        - name: homelab-ca
-          mountPath: /homelab-ca
-          readOnly: true
-        - name: ca-dir
-          mountPath: /etc/ssl/homelab
       containers:
       - name: runner
         image: myoung34/github-runner:latest
@@ -82,7 +69,7 @@ spec:
           mountPath: /tmp/runner/work
         - name: buildkit-config
           mountPath: /buildkit-config
-        - name: ca-dir
+        - name: homelab-ca
           mountPath: /etc/ssl/homelab
           readOnly: true
       - name: dind
@@ -92,6 +79,14 @@ spec:
         env:
         - name: DOCKER_TLS_CERTDIR
           value: ""
+        command:
+        - sh
+        - -c
+        - |
+          mkdir -p /etc/docker/certs.d/harbor.192.168.0.240.nip.io
+          cp /homelab-ca/homelab-ca.crt \
+             /etc/docker/certs.d/harbor.192.168.0.240.nip.io/ca.crt
+          dockerd-entrypoint.sh
         resources:
           requests:
             cpu: 200m
@@ -106,8 +101,8 @@ spec:
           mountPath: /var/lib/docker
         - name: buildkit-config
           mountPath: /buildkit-config
-        - name: ca-dir
-          mountPath: /etc/ssl/docker/certs.d/harbor.192.168.0.240.nip.io
+        - name: homelab-ca
+          mountPath: /homelab-ca
           readOnly: true
       volumes:
       - name: work
@@ -119,5 +114,3 @@ spec:
       - name: homelab-ca
         secret:
           secretName: homelab-ca-cert
-      - name: ca-dir
-        emptyDir: {}
