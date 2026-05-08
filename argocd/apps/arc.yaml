@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://actions-runner-controller.github.io/actions-runner-controller
+      chart: actions-runner-controller
+      targetRevision: 0.23.7
+      helm:
+        valueFiles:
+          - $values/apps/arc/values.yaml
+    - repoURL: https://github.com/MiguelABFlores/homelab-gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,11 @@
+# Actions Runner Controller
+replicaCount: 1
+
+# Webhook para detectar jobs más rápido (opcional pero recomendado)
+githubWebhookServer:
+  enabled: false
+
+# Métricas para Prometheus
+metrics:
+  serviceAnnotations:
+    prometheus.io/scrape: "true"
