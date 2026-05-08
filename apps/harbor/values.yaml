@@ -1,7 +1,10 @@
 expose:
   type: ingress
   tls:
-    enabled: false
+    enabled: true
+    certSource: secret
+    secret:
+      secretName: harbor-tls
   ingress:
     hosts:
       core: harbor.192.168.0.240.nip.io
