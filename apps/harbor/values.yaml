@@ -39,6 +39,9 @@ persistence:
 harborAdminPassword: ChangeMeInUI123!
 logLevel: info
 
+updateStrategy:
+  type: Recreate
+
 core:
   resources:
     requests: {cpu: 50m, memory: 256Mi}
@@ -48,14 +51,10 @@ portal:
     requests: {cpu: 20m, memory: 64Mi}
     limits: {memory: 128Mi}
 jobservice:
-  updateStrategy:
-    type: Recreate
   resources:
     requests: {cpu: 50m, memory: 256Mi}
     limits: {memory: 512Mi}
 registry:
-  updateStrategy:
-    type: Recreate
   registry:
     resources:
       requests: {cpu: 50m, memory: 256Mi}
@@ -66,8 +65,6 @@ registry:
       limits: {memory: 128Mi}
 trivy:
   enabled: true
-  updateStrategy:
-    type: Recreate
   resources:
     requests: {cpu: 50m, memory: 256Mi}
     limits: {memory: 512Mi}
