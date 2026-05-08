@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-runner
+  namespace: github-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: github-runner
+  template:
+    metadata:
+      labels:
+        app: github-runner
+    spec:
+      containers:
+      - name: runner
+        image: myoung34/github-runner:latest
+        env:
+        - name: REPO_URL
+          value: https://github.com/MiguelABFlores/miguelabf-devops-portfolio
+        - name: RUNNER_NAME
+          value: homelab-runner
+        - name: RUNNER_WORKDIR
+          value: /tmp/runner/work
+        - name: RUNNER_GROUP
+          value: default
+        - name: RUNNER_LABELS
+          value: self-hosted,homelab,linux,amd64
+        - name: ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: github-runner-token
+              key: token
+        - name: RUNNER_SCOPE
+          value: repo
+        - name: DISABLE_AUTO_UPDATE
+          value: "true"
+        # Docker-in-Docker para poder hacer docker build
+        - name: DOCKER_HOST
+          value: tcp://localhost:2375
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 3Gi
+        volumeMounts:
+        - name: work
+          mountPath: /tmp/runner/work
+      # DinD sidecar — permite hacer docker build dentro del runner
+      - name: dind
+        image: docker:24-dind
+        securityContext:
+          privileged: true
+        env:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+        # Configurar Harbor como insecure registry
+        args:
+          - --insecure-registry=harbor.192.168.0.240.nip.io
+        volumeMounts:
+        - name: work
+          mountPath: /tmp/runner/work
+        - name: docker-storage
+          mountPath: /var/lib/docker
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+      volumes:
+      - name: work
+        emptyDir: {}
+      - name: docker-storage
+        emptyDir: {}
