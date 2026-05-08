@@ -13,6 +13,22 @@ spec:
       labels:
         app: github-runner
     spec:
+      initContainers:
+      - name: buildkit-config
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          mkdir -p /buildkit-config
+          cat > /buildkit-config/buildkitd.toml <<'TOML'
+          [registry."harbor.192.168.0.240.nip.io"]
+            http = true
+            insecure = true
+          TOML
+        volumeMounts:
+        - name: buildkit-config
+          mountPath: /buildkit-config
       containers:
       - name: runner
         image: myoung34/github-runner:latest
@@ -36,9 +52,10 @@ spec:
           value: repo
         - name: DISABLE_AUTO_UPDATE
           value: "true"
-        # Docker-in-Docker para poder hacer docker build
         - name: DOCKER_HOST
           value: tcp://localhost:2375
+        - name: BUILDKITD_FLAGS
+          value: --config /buildkit-config/buildkitd.toml
         resources:
           requests:
             cpu: 200m
@@ -49,7 +66,8 @@ spec:
         volumeMounts:
         - name: work
           mountPath: /tmp/runner/work
-      # DinD sidecar — permite hacer docker build dentro del runner
+        - name: buildkit-config
+          mountPath: /buildkit-config
       - name: dind
         image: docker:24-dind
         securityContext:
@@ -57,14 +75,8 @@ spec:
         env:
         - name: DOCKER_TLS_CERTDIR
           value: ""
-        # Configurar Harbor como insecure registry
         args:
           - --insecure-registry=harbor.192.168.0.240.nip.io
-        volumeMounts:
-        - name: work
-          mountPath: /tmp/runner/work
-        - name: docker-storage
-          mountPath: /var/lib/docker
         resources:
           requests:
             cpu: 200m
@@ -72,8 +84,17 @@ spec:
           limits:
             cpu: 2000m
             memory: 2Gi
+        volumeMounts:
+        - name: work
+          mountPath: /tmp/runner/work
+        - name: docker-storage
+          mountPath: /var/lib/docker
+        - name: buildkit-config
+          mountPath: /buildkit-config
       volumes:
       - name: work
         emptyDir: {}
       - name: docker-storage
+        emptyDir: {}
+      - name: buildkit-config
         emptyDir: {}
