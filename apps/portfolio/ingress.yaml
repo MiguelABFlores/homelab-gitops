@@ -13,6 +13,16 @@ spec:
         - www.miguelabf-devops.com
       secretName: portfolio-tls
   rules:
+    - host: portfolio.192.168.0.240.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portfolio
+                port:
+                  number: 80
     - host: miguelabf-devops.com
       http:
         paths:
