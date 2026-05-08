@@ -23,12 +23,24 @@ spec:
           mkdir -p /buildkit-config
           cat > /buildkit-config/buildkitd.toml <<'TOML'
           [registry."harbor.192.168.0.240.nip.io"]
-            http = true
-            insecure = true
+            ca=["/etc/ssl/homelab/homelab-ca.crt"]
           TOML
         volumeMounts:
         - name: buildkit-config
           mountPath: /buildkit-config
+      - name: install-ca
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          cp /homelab-ca/homelab-ca.crt /etc/ssl/homelab/homelab-ca.crt
+        volumeMounts:
+        - name: homelab-ca
+          mountPath: /homelab-ca
+          readOnly: true
+        - name: ca-dir
+          mountPath: /etc/ssl/homelab
       containers:
       - name: runner
         image: myoung34/github-runner:latest
@@ -56,6 +68,8 @@ spec:
           value: tcp://localhost:2375
         - name: BUILDKITD_FLAGS
           value: --config /buildkit-config/buildkitd.toml
+        - name: NODE_EXTRA_CA_CERTS
+          value: /etc/ssl/homelab/homelab-ca.crt
         resources:
           requests:
             cpu: 200m
@@ -68,6 +82,9 @@ spec:
           mountPath: /tmp/runner/work
         - name: buildkit-config
           mountPath: /buildkit-config
+        - name: ca-dir
+          mountPath: /etc/ssl/homelab
+          readOnly: true
       - name: dind
         image: docker:24-dind
         securityContext:
@@ -75,8 +92,6 @@ spec:
         env:
         - name: DOCKER_TLS_CERTDIR
           value: ""
-        args:
-          - --insecure-registry=harbor.192.168.0.240.nip.io
         resources:
           requests:
             cpu: 200m
@@ -91,10 +106,18 @@ spec:
           mountPath: /var/lib/docker
         - name: buildkit-config
           mountPath: /buildkit-config
+        - name: ca-dir
+          mountPath: /etc/ssl/docker/certs.d/harbor.192.168.0.240.nip.io
+          readOnly: true
       volumes:
       - name: work
         emptyDir: {}
       - name: docker-storage
         emptyDir: {}
       - name: buildkit-config
+        emptyDir: {}
+      - name: homelab-ca
+        secret:
+          secretName: homelab-ca-cert
+      - name: ca-dir
         emptyDir: {}
