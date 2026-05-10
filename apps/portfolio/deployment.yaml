@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: portfolio
-        image: harbor.192.168.0.240.nip.io/portfolio/site:sha-22da1aad
+        image: harbor.192.168.0.240.nip.io/portfolio/site:sha-d34058a0
         ports:
         - name: http
           containerPort: 80
