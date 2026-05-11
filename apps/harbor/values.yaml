@@ -12,7 +12,7 @@ expose:
     controller: default
     annotations: {}
 
-externalURL: http://harbor.192.168.0.240.nip.io
+externalURL: https://harbor.192.168.0.240.nip.io
 
 database:
   type: internal
@@ -32,10 +32,10 @@ persistence:
   enabled: true
   resourcePolicy: keep
   persistentVolumeClaim:
-    registry:    {storageClass: longhorn, size: 10Gi}
+    registry:    {storageClass: longhorn, size: 50Gi}
     jobservice:
       jobLog:    {storageClass: longhorn, size: 1Gi}
-    database:    {storageClass: longhorn, size: 2Gi}
+    database:    {storageClass: longhorn, size: 5Gi}
     redis:       {storageClass: longhorn, size: 1Gi}
     trivy:       {storageClass: longhorn, size: 5Gi}
 

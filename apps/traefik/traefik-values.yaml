@@ -1,0 +1,58 @@
+deployment:
+  replicas: 1
+
+service:
+  type: LoadBalancer
+  spec:
+    loadBalancerIP: 192.168.0.240
+
+ports:
+  web:
+    port: 8000
+    expose:
+      default: true
+    exposedPort: 80
+  websecure:
+    port: 8443
+    expose:
+      default: true
+    exposedPort: 443
+  metrics:
+    port: 9100
+    expose:
+      default: false
+    exposedPort: 9100
+    protocol: TCP
+
+ingressRoute:
+  dashboard:
+    enabled: false
+
+providers:
+  kubernetesIngress:
+    enabled: true
+  kubernetesCRD:
+    enabled: true
+  kubernetesGateway:
+    enabled: true
+
+logs:
+  general:
+    level: INFO
+  access:
+    enabled: true
+
+metrics:
+  prometheus:
+    enabled: true
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
+    entryPoint: metrics
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      namespaceSelector:
+        any: true
+      additionalLabels:
+        release: monitoring
